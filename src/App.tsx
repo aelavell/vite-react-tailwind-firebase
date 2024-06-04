@@ -1,14 +1,32 @@
-import { useState } from 'react'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import SignIn from "./SignIn";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import './App.css';
 
-function App() {
+const App: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <>
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
-    </>
-  )
-}
+    <div>
+      <h1>Firebase Example</h1>
+      {user ? (
+        <div>
+          <p>Welcome, {user.displayName}</p>
+          <SignIn />
+        </div>
+      ) : (
+        <SignIn />
+      )}
+    </div>
+  );
+};
 
-export default App
+export default App;

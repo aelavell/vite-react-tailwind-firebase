@@ -79,7 +79,7 @@ const App: React.FC = () => {
       {user ? (
         <div>
           <p>Welcome, {user.displayName}</p>
-          <SignIn />
+          <SignIn user={user} />
           <input
             type="text"
             value={newMessage}
@@ -95,7 +95,7 @@ const App: React.FC = () => {
           </ul>
         </div>
       ) : (
-        <SignIn />
+        <SignIn user={user} />
       )}
     </div>
   );

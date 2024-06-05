@@ -2,7 +2,11 @@ import React from "react";
 import { auth, googleProvider } from "./firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 
-const SignIn: React.FC = () => {
+interface SignInProps {
+  user: any;
+}
+
+const SignIn: React.FC<SignInProps> = ({user}) => {
   const handleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
@@ -21,8 +25,10 @@ const SignIn: React.FC = () => {
 
   return (
     <div>
-      <button onClick={handleSignIn}>Sign in with Google</button>
-      <button onClick={handleSignOut}>Sign out</button>
+      {!user ? 
+        <button onClick={handleSignIn}>Sign in with Google</button> :
+        <button onClick={handleSignOut}>Sign out</button>
+      }
     </div>
   );
 };

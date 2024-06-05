@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import SignIn from "./SignIn";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import './App.css';
 
 const App: React.FC = () => {
@@ -25,7 +25,7 @@ const App: React.FC = () => {
         setNewMessage("");
         const docRef = await addDoc(collection(db, "messages"), {
           text: msg,
-          uid: user.uid,
+          userId: user.uid,
           createdAt: new Date()
         });
         console.log("Message added successfully, docRef:", docRef);
@@ -37,16 +37,35 @@ const App: React.FC = () => {
     }
   };
 
+  const deleteMessage = async (message) => {
+    try {
+      const messageId = message.id;
+      const messageRef = doc(db, "messages", messageId);
+      await deleteDoc(messageRef);
+      console.log("Message deleted successfully");
+    } catch (error) {
+      console.error("Error deleting message: ", error);
+    }
+  };
+
   useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+    if (!user) {
+      return;
+    }
+
+    const q = query(collection(db, "messages"), where("userId", "==", user?.uid));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const messagesList = querySnapshot.docs.map(doc => doc.data());
+      const messagesList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data() 
+      }));
       setMessages(messagesList);
     });
-
+  
     // Clean up the listener on unmount
     return () => unsubscribe();
-  }, []);
+  }, [user]); 
+
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -71,7 +90,7 @@ const App: React.FC = () => {
           <button onClick={addMessage}>Add Message</button>
           <ul>
             {messages.map((message, index) => (
-              <li key={index}>{message.text}</li>
+              <li key={index}>{message.text} <button onClick={() => deleteMessage(message)}>X</button></li>
             ))}
           </ul>
         </div>

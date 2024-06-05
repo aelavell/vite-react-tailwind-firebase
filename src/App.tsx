@@ -39,8 +39,7 @@ const App: React.FC = () => {
 
   const deleteMessage = async (message) => {
     try {
-      const messageId = message.id;
-      const messageRef = doc(db, "messages", messageId);
+      const messageRef = doc(db, "messages", message.id);
       await deleteDoc(messageRef);
       console.log("Message deleted successfully");
     } catch (error) {
